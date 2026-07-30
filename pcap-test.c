@@ -27,7 +27,7 @@ bool parse(Param* param, int argc, char* argv[]) {
 }
 
 bool is_tcp(unsigned char* packet) {
-	return (ntohs(*(packet + ETHER_TYPE_OFFSET)) == 0x0800)
+	return (ntohs(*(uint16_t*)(packet + ETHER_TYPE_OFFSET)) == 0x0800)
 		&& (*(uint8_t*)(packet + sizeof(ethernet_hdr) + IP_PROTOCOL_OFFSET) == 0x6);
 }
 
@@ -69,14 +69,27 @@ void print_packet_info(unsigned char* packet, uint32_t caplen){
 
 	tcp_hdr *tcp = (tcp_hdr*)(packet + sizeof(ethernet_hdr) + ip_hdr_len);
 	uint8_t data_offset = (tcp->th_off & 0xf) * 4;
-
+	uint32_t hdr_len = sizeof(ethernet_hdr) + ip_hdr_len + data_offset;
+	
 	res.src_port = ntohs(tcp->sport);
 	res.dst_port = ntohs(tcp->dport);
+	
+	if (caplen > hdr_len){
+		uint32_t data_len = caplen - hdr_len;
+		if (data_len > sizeof(res.payload)){
+			data_len = sizeof(res.payload);
+		}
+		memcpy(res.payload, packet + hdr_len, data_len);
+		res.payload[data_len] = '\0';
 
-	memcpy(res.payload, packet + sizeof(ethernet_hdr) + ip_hdr_len + data_offset, 20);
-
+	}
+	
 	print_mac(res.src_mac, res.dst_mac);
 	print_addr(res.ip_src, res.ip_dst, res.src_port, res.dst_port);
+	
+	printf("Data: ");
+	fwrite(res.payload, 1, strlen(res.payload), stdout);
+	printf("\n\n");
 
 }
 

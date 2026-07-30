@@ -6,7 +6,7 @@
 #endif
 
 #ifndef IP_PROTOCOL_OFFSET
-#define IP_PROTOCOL_OFFSET  0x48
+#define IP_PROTOCOL_OFFSET  0x9
 #endif
 
 
