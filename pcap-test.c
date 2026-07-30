@@ -27,7 +27,6 @@ bool parse(Param* param, int argc, char* argv[]) {
 }
 
 bool is_tcp(unsigned char* packet) {
-	printf("!%hhu\n",(*(uint8_t*)(packet + sizeof(ethernet_hdr) + IP_PROTOCOL_OFFSET)));
 	return (ntohs(*(packet + ETHER_TYPE_OFFSET)) == 0x0800)
 		&& (*(uint8_t*)(packet + sizeof(ethernet_hdr) + IP_PROTOCOL_OFFSET) == 0x6);
 }
@@ -102,7 +101,6 @@ int main(int argc, char* argv[]) {
 			break;
 		}
 		if (!is_tcp(packet)) {
-			// printf("!\n");
 			continue;
 		}
 		printf("%u bytes captured\n", header->caplen);
